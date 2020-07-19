@@ -12,14 +12,14 @@ foreach ($opt as $value) {
 if ($return===1) {
     $data=[
         "status" => "ERROR",
-        "output" => "ビルドの開始に失敗しました\n".$opt_str
+        "output" => "リポジトリの更新作業の開始に失敗しました\n".$opt_str
     ];
     $data = json_encode($data);
     echo $data;
 }elseif ($return===0) {
     $data=[
         "status" => "OK",
-        "output" => "ビルドの開始に成功しました\n".$opt_str
+        "output" => "リポジトリの更新作業の開始に成功しました\n".$opt_str
     ];
     $data = json_encode($data);
     echo $data;
