@@ -1,6 +1,6 @@
 <?php
 
-$cmd = 'ls -l /usr';
+$cmd = 'sleep 30 && ls -l /usr';
 exec($cmd, $opt, $return);
 $opt_str="";
 foreach ($opt as $value) {
