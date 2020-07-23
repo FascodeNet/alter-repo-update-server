@@ -1,10 +1,21 @@
+#!/usr/bin/env bash
+
 sign=true
 
 aur_pkgs=(
-    neofetch-git
-    plymouth
+    "alterlinux-calamares"
+    "alterlinux-fcitx-conf"
+    "alterlinux-keyring"
+    "alterlinux-mirrorlist"
+    "alterlinux-plasmalnf"
+    "alterlinux-wallpapers"
+    "alterlinux-xfce-conf"
+    "aptpac"
+    "dummy"
+    "grub-theme-vimix-alter"
+    "lightdm-webkit2-theme-alter"
+    "lsd-control"
+    "plymouth-theme-alter-logo"
+    "plymouth-theme-alter-pp"
 )
 
-git_pkgs=(
-
-)
