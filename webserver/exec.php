@@ -1,9 +1,10 @@
 <?php
 
-command("/home/naoko/alterlinux-pkgbuilds/get_from_aur.sh");
-command("/home/naoko/alterlinux-repository/scripts/main.sh");
+ini_set("register_argc_argv",1);
+command("/home/naoko/alterlinux-pkgbuilds/get_from_aur.sh",$argv[1]);
+command("/home/naoko/alterlinux-repository/scripts/main.sh",$argv[1]);
 
-function command($cmd){
+function command($cmd,$arg){
     exec($cmd, $opt, $return);
     $opt_str="";
     foreach ($opt as $value) {
@@ -12,7 +13,7 @@ function command($cmd){
     if ($return===1) {
         $data=[
             "status" => "ERROR",
-            "output" => $cmd."\n".$opt_str
+            "output" => $opt_str
         ];
         $data = json_encode($data);
         $context = stream_context_create(
@@ -25,11 +26,11 @@ function command($cmd){
             )
         );
 
-        $responses_json = file_get_contents($argv[1], false, $context);
+        $responses_json = file_get_contents($arg, false, $context);
     }elseif ($return===0) {
         $data=[
             "status" => "OK",
-            "output" => $cmd."\n".$opt_str
+            "output" => $opt_str
         ];
         $data = json_encode($data);
         $context = stream_context_create(
@@ -42,6 +43,7 @@ function command($cmd){
             )
         );
 
-        $responses_json = file_get_contents($argv[1], false, $context);
+        $responses_json = file_get_contents($arg, false, $context);
+        error_log($responses_json);
     }
 }
