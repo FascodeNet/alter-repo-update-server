@@ -244,6 +244,7 @@ sign_pkg() {
 
 
 build() {
+    rm -rf "${work_dir}/git_work"
     git clone "${git_url}" "${work_dir}/git_work"
     local init_dir=$(pwd)
 
@@ -251,7 +252,7 @@ build() {
     local pkg
     for pkg in $(ls 2> /dev/null); do
         cd "${pkg}"
-        makepkg -sf --noconfirm
+        makepkg -srCf --noconfirm --needed
         mv *.pkg.tar.* "${repo_dir}/${repo_name}/${arch}"
         cd ..
     done
