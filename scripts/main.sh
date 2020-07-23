@@ -240,28 +240,8 @@ sign_pkg() {
     done
 }
 
-build_aur() {
-    local pkg
-    for pkg in "${aur_pkgs[@]}"; do
-        # Clone
-        rm -rf "${work_dir}/${pkg}"
-        mkdir -p "${work_dir}/${pkg}"
-        git clone "https://aur.archlinux.org/${pkg}.git" "${work_dir}/${pkg}"
 
-        # ビルド
-        cd "${work_dir}/${pkg}"
-        makepkg -sf --noconfirm
-
-        # 移動
-        mv *.pkg.tar.* "${repo_dir}/${repo_name}/${arch}"
-        cd - >> /dev/null
-
-        # 削除
-        rm -rf "${work_dir}/${pkg}"
-    done
-}
-
-build_git() {
+build() {
     git clone "${git_url}" "${work_dir}/git_work"
     local init_dir=$(pwd)
 
@@ -357,8 +337,7 @@ if [[ -n "${@}" ]]; then
             exit 0
             ;;
         "build")
-            build_aur
-            build_git
+            build
             sign_pkg
             ;;
         *)
