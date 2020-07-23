@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+sign=true
+
+aur_pkgs=(
+    "linux-ck"
+    "linux-lqx"
+    "linux-rt"
+    "linux-rt-lts"
+    "linux-xanmod"
+    "linux-xanmod-lts"
+    "linux-zen-letsnote"
+)
+
