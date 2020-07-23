@@ -33,11 +33,11 @@ _usage() {
     echo
     echo " General options:"
     echo
-    echo "    --architecture <arch>     Specify the architecture"
-    echo "    --repodir                 Specify the repository dir"
-    echo "    --giturl                  Specify the URL of the repository where the PKGBUILD list is stored"
-    echo "    --workdir                 Specify the work dir"
-    echo "    --help                    This help messageExecuted via administrator web and Yama D Saba APIs"
+    echo "    -a | --arch <arch>             Specify the architecture"
+    echo "    -r | --repodir <dir>           Specify the repository dir"
+    echo "    -g | --giturl <url>            Specify the URL of the repository where the PKGBUILD list is stored"
+    echo "    -w | --workdir <dir>           Specify the work dir"
+    echo "    -h | --help                    This help messageExecuted via administrator web and Yama D Saba APIs"
     echo
     echo "    list                      List packages"
     echo "    build                     BUold all packages"
@@ -277,8 +277,8 @@ if [[ -z "${@}" ]]; then
 fi
 
 options="${@}"
-_opt_short="h"
-_opt_long="help,architecture:,giturl:,aurlist:,reponame:,repodir:,workdir:,"
+_opt_short="h,a:,g:,r:,w:"
+_opt_long="help,arch:,giturl:,repodir:,workdir:"
 OPT=$(getopt -o ${_opt_short} -l ${_opt_long} -- "${@}")
 if [[ ${?} != 0 ]]; then
     exit 1
@@ -295,7 +295,7 @@ while :; do
             _usage 0
             shift 1
             ;;
-        --architecture)
+        --arch)
             arch="${2}"
             shift 2
             ;;
