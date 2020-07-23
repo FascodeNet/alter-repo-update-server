@@ -1,0 +1,10 @@
+sign=true
+
+aur_pkgs=(
+    neofetch-git
+    plymouth
+)
+
+git_pkgs=(
+
+)
