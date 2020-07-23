@@ -23,7 +23,9 @@ repo_dir="${script_path}/repo"
 
 debug=false
 
-set -eu
+command=""
+
+set -e
 
 # usage <exit code>
 _usage() {
@@ -254,6 +256,10 @@ build() {
         cd ..
     done
     rm -rf "${work_dir}/git_work"
+
+    if ${sign}; then
+        sign_pkg
+    fi
 }
 
 
@@ -316,35 +322,29 @@ while :; do
     esac
 done
 
-# Parse repo
-repo_config="${script_path}/${repo_name}"
-if [[ ! -f "${repo_config}" ]]; then
-    _msg_error "Repository configuration file does not exist."
+if [[ -n "${1}" ]]; then
+    repo_name="${1}"
+    repo_config="${script_path}/${repo_name}"
+    if [[ ! -f "${repo_config}" ]]; then
+        _msg_error "Repository [${repo_name}] does not exist." "1"
+    else
+        source "${repo_config}"
+    fi
 else
-    source "${repo_config}"
+    _usage 1
 fi
 
-# Run
-prepare
-
-
-# Parse command
-if [[ -n "${@}" ]]; then
-    case "${1}" in
-        "list")
-            echo "${git_pkgs[@]}"
-            echo "${aur_pkgs[@]}"
-            exit 0
-            ;;
-        "build")
-            build
-            sign_pkg
-            ;;
-        *)
-            _msg_error "Invalid command '${1}'"
-            exit 1
-            ;;
+if [[ -n "${2}" ]]; then
+     case "${2}" in
+        "list") command="list" ;;
+        "build") command="build" ;;
+        *) _msg_error "Invalid command '${2}'" "1" ;;
     esac
 else
     _usage 1
 fi
+
+
+# Run
+prepare
+${command}
