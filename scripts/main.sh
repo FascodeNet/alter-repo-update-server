@@ -248,7 +248,7 @@ build() {
     git clone "${git_url}" "${work_dir}/git_work"
     local init_dir=$(pwd)
 
-    cd "${work_dir}/git_work/${repo_name}"
+    cd "${work_dir}/git_work/${repo_name}/${arch}"
     local pkg
     for pkg in $(ls 2> /dev/null); do
         cd "${pkg}"
