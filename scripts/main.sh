@@ -247,10 +247,17 @@ build() {
     rm -rf "${work_dir}/git_work"
     git clone "${git_url}" "${work_dir}/git_work"
     local init_dir=$(pwd)
+    local build_list
 
     cd "${work_dir}/git_work/${repo_name}/${arch}"
     local pkg
-    for pkg in $(ls 2> /dev/null); do
+    if [[ "${pkgs[@]}" = "ALL" ]]; then
+        build_list=($(ls 2> /dev/null))
+    else
+        build_list=(${pkgs[@]})
+    fi
+
+    for pkg in ${build_list[@]}; do
         cd "${pkg}"
         makepkg -srCf --noconfirm --needed
         mv *.pkg.tar.* "${repo_dir}/${repo_name}/${arch}"
@@ -294,14 +301,6 @@ while :; do
             ;;
         --giturl)
             git_url="${2}"
-            shift 2
-            ;;
-        --aurlist)
-            aur_pkg_listfile="${2}"
-            shift 2
-            ;;
-        --gitlist)
-            git_pkg_listfile="${2}"
             shift 2
             ;;
         --repodir)

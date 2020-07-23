@@ -2,20 +2,5 @@
 
 sign=true
 
-aur_pkgs=(
-    "alterlinux-calamares"
-    "alterlinux-fcitx-conf"
-    "alterlinux-keyring"
-    "alterlinux-mirrorlist"
-    "alterlinux-plasmalnf"
-    "alterlinux-wallpapers"
-    "alterlinux-xfce-conf"
-    "aptpac"
-    "dummy"
-    "grub-theme-vimix-alter"
-    "lightdm-webkit2-theme-alter"
-    "lsd-control"
-    "plymouth-theme-alter-logo"
-    "plymouth-theme-alter-pp"
-)
+pkgs=("ALL")
 
