@@ -15,7 +15,7 @@ script_name=$(basename ${0})
 script_path="$(readlink -f ${0%/*})"
 
 arch="$(uname -m)"
-git_url="https://github.com/FascodeNet/alterlinux-repository"
+git_url="https://github.com/FascodeNet/alterlinux-pkgbuilds"
 repo_name="alter-stable"
 
 work_dir="${script_path}/work"
