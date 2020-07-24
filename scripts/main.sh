@@ -254,6 +254,8 @@ build() {
     root_check
 
     rm -rf "${work_dir}/git_work"
+    mkdir -p "${work_dir}/lockfile/${repo_name}/${arch}"
+    mkdir -p "${work_dir}/pkgs/${repo_name}/${arch}"
     git clone "${git_url}" "${work_dir}/git_work"
     local init_dir=$(pwd)
     local build_list
@@ -268,11 +270,21 @@ build() {
 
     for pkg in ${build_list[@]}; do
         cd "${pkg}"
-        makepkg -srCf --noconfirm --needed --skippgpcheck
-        mv *.pkg.tar.* "${repo_dir}/${repo_name}/${arch}"
+        if [[ ! -f "${work_dir}/lockfile/${repo_name}/${arch}/${pkg}" ]]; then
+            makepkg -srCf --noconfirm --needed --skippgpcheck
+            mv *.pkg.tar.* "${work_dir}/pkgs/${repo_name}/${arch}"
+            touch "${work_dir}/lockfile/${repo_name}/${arch}/${pkg}"
+        else
+            _msg_info "${pkg} is already built."
+        fi
         cd ..
     done
+
+    _msg_info "Copying package to repository directory..."
+    cp "${work_dir}/pkgs/${repo_name}/${arch}/"* "${repo_dir}/${repo_name}/${arch}"
+
     rm -rf "${work_dir}/git_work"
+    
 
     if ${sign}; then
         sign_pkg
