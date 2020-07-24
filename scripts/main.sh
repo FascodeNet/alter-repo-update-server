@@ -295,19 +295,19 @@ while :; do
             _usage 0
             shift 1
             ;;
-        --arch)
+        --arch | -a)
             arch="${2}"
             shift 2
             ;;
-        --giturl)
+        --giturl | -g)
             git_url="${2}"
             shift 2
             ;;
-        --repodir)
+        --repodir | -r)
             repo_dir="${2}"
             shift 2
             ;;
-        --workdir)
+        --workdir | -w)
             work_dir="${2}"
             shift 2
             ;;
