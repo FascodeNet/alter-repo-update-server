@@ -245,6 +245,7 @@ sign_pkg() {
     cd "${repo_dir}/${repo_name}/${arch}"
     rm -rf *.sig
     for pkg in $(ls ./*.pkg.tar.* | grep -v .sig | grep -v .sh); do
+        _msg_info "Signing ${pkg}..."
         gpg --detach-sign ${pkg}
     done
 }
@@ -278,6 +279,7 @@ build() {
             _msg_info "${pkg} is already built."
         fi
         cd ..
+        rm -rf "${pkg}"
     done
 
     _msg_info "Copying package to repository directory..."
@@ -289,6 +291,7 @@ build() {
     if ${sign}; then
         sign_pkg
     fi
+    repo_update
 }
 
 
