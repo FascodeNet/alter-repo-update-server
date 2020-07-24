@@ -271,7 +271,7 @@ build() {
     for pkg in ${build_list[@]}; do
         cd "${pkg}"
         if [[ ! -f "${work_dir}/lockfile/${repo_name}/${arch}/${pkg}" ]]; then
-            makepkg -srCf --noconfirm --needed --skippgpcheck
+            makepkg --syncdeps --rmdeps --clean --cleanbuild --force --noconfirm --needed --skippgpcheck
             mv *.pkg.tar.* "${work_dir}/pkgs/${repo_name}/${arch}"
             touch "${work_dir}/lockfile/${repo_name}/${arch}/${pkg}"
         else
