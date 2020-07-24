@@ -41,11 +41,12 @@ _usage() {
     echo "    -f | --force                   Force builds of already built packages"
     echo "         --force-repo              Overwrite the existing repository."
     echo "    -w | --workdir <dir>           Specify the work dir"
-    echo "    -h | --help                    This help messageExecuted via administrator web and Yama D Saba APIs"
+    echo "    -h | --help                    Show this help message"
     echo
-    echo "    list                      List packages"
-    echo "    build                     Build all packages"
-    echo "    clean                     Remove working directory"
+    echo "    list                           List packages"
+    echo "    build                          Build all packages"
+    echo "    clean                          Remove working directory"
+    echo "    help                           Show this help message"
 
     if [[ -n "${1:-}" ]]; then
         exit "${1}"
@@ -387,6 +388,7 @@ if [[ -n "${2}" ]]; then
         "list") command="list" ;;
         "build") command="build" ;;
         "clean") command="clean" ;;
+        "help" ) _usage 0 ;;
         *) _msg_error "Invalid command '${2}'" "1" ;;
     esac
 else
