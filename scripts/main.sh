@@ -226,6 +226,13 @@ prepare() {
     check_command pacman
 }
 
+root_check() {
+    # root check
+    if [[ "${UID}" = 0 ]]; then
+        _msg_error "It cannot be run by the root user."
+        _msg_error "Be sure to execute it from a general user." "1"
+    fi
+}
 
 repo_update() {
     cd "${repo_dir}/${repo_name}/${arch}"
@@ -244,6 +251,8 @@ sign_pkg() {
 
 
 build() {
+    root_check
+
     rm -rf "${work_dir}/git_work"
     git clone "${git_url}" "${work_dir}/git_work"
     local init_dir=$(pwd)
