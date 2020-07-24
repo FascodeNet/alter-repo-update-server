@@ -306,6 +306,11 @@ build() {
 }
 
 
+clean() {
+    sudo rm -rf "${work_dir}"
+}
+
+
 # Parse options
 if [[ -z "${@}" ]]; then
     _usage 0
@@ -381,6 +386,7 @@ if [[ -n "${2}" ]]; then
      case "${2}" in
         "list") command="list" ;;
         "build") command="build" ;;
+        "clean") command="clean" ;;
         *) _msg_error "Invalid command '${2}'" "1" ;;
     esac
 else
