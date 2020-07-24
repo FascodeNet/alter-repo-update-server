@@ -23,6 +23,8 @@ repo_dir="${script_path}/repo"
 
 debug=false
 
+force=false
+force_repo=false
 command=""
 
 set -e
@@ -36,11 +38,15 @@ _usage() {
     echo "    -a | --arch <arch>             Specify the architecture"
     echo "    -r | --repodir <dir>           Specify the repository dir"
     echo "    -g | --giturl <url>            Specify the URL of the repository where the PKGBUILD list is stored"
+    echo "    -f | --force                   Force builds of already built packages"
+    echo "         --force-repo              Overwrite the existing repository."
     echo "    -w | --workdir <dir>           Specify the work dir"
-    echo "    -h | --help                    This help messageExecuted via administrator web and Yama D Saba APIs"
+    echo "    -h | --help                    Show this help message"
     echo
-    echo "    list                      List packages"
-    echo "    build                     BUold all packages"
+    echo "    list                           List packages"
+    echo "    build                          Build all packages"
+    echo "    clean                          Remove working directory"
+    echo "    help                           Show this help message"
 
     if [[ -n "${1:-}" ]]; then
         exit "${1}"
@@ -119,7 +125,7 @@ _msg_info() {
         esac
     done
     shift $((OPTIND - 1))
-    echo ${echo_opts} "$( echo_color -t '36' '[]')    $( echo_color -t '32' 'Info') ${*}"
+    echo ${echo_opts} "$( echo_color -t '36' "[${script_name}]")    $( echo_color -t '32' 'Info') ${*}"
 }
 
 
@@ -136,7 +142,7 @@ _msg_warn() {
         esac
     done
     shift $((OPTIND - 1))
-    echo ${echo_opts} "$( echo_color -t '36' '[${script_name}]') $( echo_color -t '33' 'Warning') ${*}" >&2
+    echo ${echo_opts} "$( echo_color -t '36' "[${script_name}]") $( echo_color -t '33' 'Warning') ${*}" >&2
 }
 
 
@@ -154,7 +160,7 @@ _msg_debug() {
     done
     shift $((OPTIND - 1))
     if [[ "${debug}" = true ]]; then
-        echo ${echo_opts} "$( echo_color -t '36' '[${script_name}]')   $( echo_color -t '35' 'Debug') ${*}"
+        echo ${echo_opts} "$( echo_color -t '36' "[${script_name}]")   $( echo_color -t '35' 'Debug') ${*}"
     fi
 }
 
@@ -174,7 +180,7 @@ _msg_error() {
         esac
     done
     shift $((OPTIND - 1))
-    echo ${echo_opts} "$( echo_color -t '36' '[${script_name}]')   $( echo_color -t '31' 'Error') ${1}" >&2
+    echo ${echo_opts} "$( echo_color -t '36' "[${script_name}]")   $( echo_color -t '31' 'Error') ${1}" >&2
     if [[ -n "${2:-}" ]]; then
         exit ${2}
     fi
@@ -226,6 +232,13 @@ prepare() {
     check_command pacman
 }
 
+root_check() {
+    # root check
+    if [[ "${UID}" = 0 ]]; then
+        _msg_error "It cannot be run by the root user."
+        _msg_error "Be sure to execute it from a general user." "1"
+    fi
+}
 
 repo_update() {
     cd "${repo_dir}/${repo_name}/${arch}"
@@ -236,15 +249,26 @@ repo_update() {
 sign_pkg() {
     local pkg
     cd "${repo_dir}/${repo_name}/${arch}"
-    rm -rf *.sig
+    remove *.sig
     for pkg in $(ls ./*.pkg.tar.* | grep -v .sig | grep -v .sh); do
+        _msg_info "Signing ${pkg}..."
         gpg --detach-sign ${pkg}
     done
 }
 
 
 build() {
-    rm -rf "${work_dir}/git_work"
+    root_check
+    if [[ "${force_repo}"  = true ]]; then
+        remove "${repo_dir}/${repo_name}/${arch}"
+    elif [[ -d "${repo_dir}/${repo_name}/${arch}" ]]; then
+        _msg_error "The repository already exists." "1"
+    fi
+
+
+    remove "${work_dir}/git_work"
+    mkdir -p "${work_dir}/lockfile/${repo_name}/${arch}"
+    mkdir -p "${work_dir}/pkgs/${repo_name}/${arch}"
     git clone "${git_url}" "${work_dir}/git_work"
     local init_dir=$(pwd)
     local build_list
@@ -259,15 +283,32 @@ build() {
 
     for pkg in ${build_list[@]}; do
         cd "${pkg}"
-        makepkg -srCf --noconfirm --needed
-        mv *.pkg.tar.* "${repo_dir}/${repo_name}/${arch}"
+        if [[ ! -f "${work_dir}/lockfile/${repo_name}/${arch}/${pkg}" ]] || [[ "${force}" = true ]]; then
+            makepkg --syncdeps --rmdeps --clean --cleanbuild --force --noconfirm --needed --skippgpcheck
+            mv *.pkg.tar.* "${work_dir}/pkgs/${repo_name}/${arch}"
+            touch "${work_dir}/lockfile/${repo_name}/${arch}/${pkg}"
+        else
+            _msg_info "${pkg} is already built."
+        fi
         cd ..
+        rm -rf "${pkg}"
     done
-    rm -rf "${work_dir}/git_work"
+
+    _msg_info "Copying package to repository directory..."
+    cp "${work_dir}/pkgs/${repo_name}/${arch}/"* "${repo_dir}/${repo_name}/${arch}"
+
+    sudo rm -rf "${work_dir}/git_work"
+
 
     if ${sign}; then
         sign_pkg
     fi
+    repo_update
+}
+
+
+clean() {
+    sudo rm -rf "${work_dir}"
 }
 
 
@@ -277,8 +318,8 @@ if [[ -z "${@}" ]]; then
 fi
 
 options="${@}"
-_opt_short="h,a:,g:,r:,w:"
-_opt_long="help,arch:,giturl:,repodir:,workdir:"
+_opt_short="h,a:,g:,r:,w:,f"
+_opt_long="help,arch:,giturl:,repodir:,workdir:,force,force-repo"
 OPT=$(getopt -o ${_opt_short} -l ${_opt_long} -- "${@}")
 if [[ ${?} != 0 ]]; then
     exit 1
@@ -295,21 +336,29 @@ while :; do
             _usage 0
             shift 1
             ;;
-        --arch)
+        --arch | -a)
             arch="${2}"
             shift 2
             ;;
-        --giturl)
+        --giturl | -g)
             git_url="${2}"
             shift 2
             ;;
-        --repodir)
+        --repodir | -r)
             repo_dir="${2}"
             shift 2
             ;;
-        --workdir)
+        --workdir | -w)
             work_dir="${2}"
             shift 2
+            ;;
+        --force | -f)
+            force=true
+            shift 1
+            ;;
+        --force-repo)
+            force_repo=true
+            shift 1
             ;;
         --)
             shift 1
@@ -338,6 +387,8 @@ if [[ -n "${2}" ]]; then
      case "${2}" in
         "list") command="list" ;;
         "build") command="build" ;;
+        "clean") command="clean" ;;
+        "help" ) _usage 0 ;;
         *) _msg_error "Invalid command '${2}'" "1" ;;
     esac
 else
