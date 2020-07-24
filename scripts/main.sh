@@ -24,7 +24,7 @@ repo_dir="${script_path}/repo"
 debug=false
 
 force=false
-
+force_repo=false
 command=""
 
 set -e
@@ -39,11 +39,13 @@ _usage() {
     echo "    -r | --repodir <dir>           Specify the repository dir"
     echo "    -g | --giturl <url>            Specify the URL of the repository where the PKGBUILD list is stored"
     echo "    -f | --force                   Force builds of already built packages"
+    echo "         --force-repo              Overwrite the existing repository."
     echo "    -w | --workdir <dir>           Specify the work dir"
     echo "    -h | --help                    This help messageExecuted via administrator web and Yama D Saba APIs"
     echo
     echo "    list                      List packages"
-    echo "    build                     BUold all packages"
+    echo "    build                     Build all packages"
+    echo "    clean                     Remove working directory"
 
     if [[ -n "${1:-}" ]]; then
         exit "${1}"
@@ -246,7 +248,7 @@ repo_update() {
 sign_pkg() {
     local pkg
     cd "${repo_dir}/${repo_name}/${arch}"
-    rm -rf *.sig
+    remove *.sig
     for pkg in $(ls ./*.pkg.tar.* | grep -v .sig | grep -v .sh); do
         _msg_info "Signing ${pkg}..."
         gpg --detach-sign ${pkg}
@@ -256,8 +258,14 @@ sign_pkg() {
 
 build() {
     root_check
+    if [[ "${force_repo}"  = true ]]; then
+        remove "${repo_dir}/${repo_name}/${arch}"
+    elif [[ -d "${repo_dir}/${repo_name}/${arch}" ]]; then
+        _msg_error "The repository already exists." "1"
+    fi
 
-    rm -rf "${work_dir}/git_work"
+
+    remove "${work_dir}/git_work"
     mkdir -p "${work_dir}/lockfile/${repo_name}/${arch}"
     mkdir -p "${work_dir}/pkgs/${repo_name}/${arch}"
     git clone "${git_url}" "${work_dir}/git_work"
@@ -305,7 +313,7 @@ fi
 
 options="${@}"
 _opt_short="h,a:,g:,r:,w:,f"
-_opt_long="help,arch:,giturl:,repodir:,workdir:,force"
+_opt_long="help,arch:,giturl:,repodir:,workdir:,force,force-repo"
 OPT=$(getopt -o ${_opt_short} -l ${_opt_long} -- "${@}")
 if [[ ${?} != 0 ]]; then
     exit 1
@@ -340,6 +348,10 @@ while :; do
             ;;
         --force | -f)
             force=true
+            shift 1
+            ;;
+        --force-repo)
+            force_repo=true
             shift 1
             ;;
         --)
