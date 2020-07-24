@@ -268,7 +268,7 @@ build() {
 
     for pkg in ${build_list[@]}; do
         cd "${pkg}"
-        makepkg -srCf --noconfirm --needed
+        makepkg -srCf --noconfirm --needed --skippgpcheck
         mv *.pkg.tar.* "${repo_dir}/${repo_name}/${arch}"
         cd ..
     done
