@@ -2,7 +2,7 @@
 
 $json = file_get_contents("php://input");
 $contents = json_decode($json, true);
-exec("php exec.php '".  $contents["callbackurl"]." ".
+exec("php exec.php ".  $contents["callbackurl"]." ".
                         $contents["architecture"]." ".
                         $contents["repository"]." ".
                         $contents["package"]." ".

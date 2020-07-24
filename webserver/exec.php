@@ -2,7 +2,7 @@
 
 ini_set("register_argc_argv",1);
 command("/srv/php/alterlinux-pkgbuilds/get_from_aur.sh -a ".$argv[2]." -r ".$argv[3]." ".$argv[4],$argv[1]);
-command("/srv/php/alterlinux-repository/main.sh -a ".$argv[2]." -r ./repo -f ".$argv[3]." ".$argv[5],$argv[1]);
+command("/srv/php/alterlinux-repository/main.sh --force-repo -a ".$argv[2]." -r ./repo -f ".$argv[3]." ".$argv[5],$argv[1]);
 
 function command($cmd,$arg){
     exec($cmd, $opt, $return);
