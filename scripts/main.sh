@@ -283,8 +283,8 @@ build() {
     _msg_info "Copying package to repository directory..."
     cp "${work_dir}/pkgs/${repo_name}/${arch}/"* "${repo_dir}/${repo_name}/${arch}"
 
-    rm -rf "${work_dir}/git_work"
-    
+    sudo rm -rf "${work_dir}/git_work"
+
 
     if ${sign}; then
         sign_pkg
