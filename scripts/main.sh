@@ -23,6 +23,8 @@ repo_dir="${script_path}/repo"
 
 debug=false
 
+force=false
+
 command=""
 
 set -e
@@ -36,6 +38,7 @@ _usage() {
     echo "    -a | --arch <arch>             Specify the architecture"
     echo "    -r | --repodir <dir>           Specify the repository dir"
     echo "    -g | --giturl <url>            Specify the URL of the repository where the PKGBUILD list is stored"
+    echo "    -f | --force                   Force builds of already built packages"
     echo "    -w | --workdir <dir>           Specify the work dir"
     echo "    -h | --help                    This help messageExecuted via administrator web and Yama D Saba APIs"
     echo
@@ -271,7 +274,7 @@ build() {
 
     for pkg in ${build_list[@]}; do
         cd "${pkg}"
-        if [[ ! -f "${work_dir}/lockfile/${repo_name}/${arch}/${pkg}" ]]; then
+        if [[ ! -f "${work_dir}/lockfile/${repo_name}/${arch}/${pkg}" ]] || [[ "${force}" = true ]]; then
             makepkg --syncdeps --rmdeps --clean --cleanbuild --force --noconfirm --needed --skippgpcheck
             mv *.pkg.tar.* "${work_dir}/pkgs/${repo_name}/${arch}"
             touch "${work_dir}/lockfile/${repo_name}/${arch}/${pkg}"
@@ -301,8 +304,8 @@ if [[ -z "${@}" ]]; then
 fi
 
 options="${@}"
-_opt_short="h,a:,g:,r:,w:"
-_opt_long="help,arch:,giturl:,repodir:,workdir:"
+_opt_short="h,a:,g:,r:,w:,f"
+_opt_long="help,arch:,giturl:,repodir:,workdir:,force"
 OPT=$(getopt -o ${_opt_short} -l ${_opt_long} -- "${@}")
 if [[ ${?} != 0 ]]; then
     exit 1
@@ -334,6 +337,10 @@ while :; do
         --workdir | -w)
             work_dir="${2}"
             shift 2
+            ;;
+        --force | -f)
+            force=true
+            shift 1
             ;;
         --)
             shift 1
