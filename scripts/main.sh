@@ -22,6 +22,7 @@ work_dir="${script_path}/work"
 repo_dir="${script_path}/repo"
 
 debug=false
+nocolor=false
 
 force=false
 force_repo=false
@@ -42,6 +43,8 @@ _usage() {
     echo "         --force-repo              Overwrite the existing repository."
     echo "    -w | --workdir <dir>           Specify the work dir"
     echo "    -h | --help                    Show this help message"
+    echo
+    echo "         --nocolor                 No colored output."
     echo
     echo "    list                           List packages"
     echo "    build                          Build all packages"
@@ -125,7 +128,11 @@ _msg_info() {
         esac
     done
     shift $((OPTIND - 1))
-    echo ${echo_opts} "$( echo_color -t '36' "[${script_name}]")    $( echo_color -t '32' 'Info') ${*}"
+    if [[ "${nocolor}" = true ]]; then
+        echo ${echo_opts} "[${script_name}]    Info ${*}"
+    else
+        echo ${echo_opts} "$( echo_color -t '36' "[${script_name}]")    $( echo_color -t '32' 'Info') ${*}"
+    fi
 }
 
 
@@ -142,7 +149,11 @@ _msg_warn() {
         esac
     done
     shift $((OPTIND - 1))
-    echo ${echo_opts} "$( echo_color -t '36' "[${script_name}]") $( echo_color -t '33' 'Warning') ${*}" >&2
+    if [[ "${nocolor}" = true ]]; then
+        echo ${echo_opts} "[${script_name}] Warning ${*}"
+    else
+        echo ${echo_opts} "$( echo_color -t '36' "[${script_name}]") $( echo_color -t '33' 'Warning') ${*}" >&2
+    fi
 }
 
 
@@ -160,7 +171,11 @@ _msg_debug() {
     done
     shift $((OPTIND - 1))
     if [[ "${debug}" = true ]]; then
-        echo ${echo_opts} "$( echo_color -t '36' "[${script_name}]")   $( echo_color -t '35' 'Debug') ${*}"
+        if [[ "${nocolor}" = true ]]; then
+            echo ${echo_opts} "[${script_name}]   Debug ${*}"
+        else
+            echo ${echo_opts} "$( echo_color -t '36' "[${script_name}]")   $( echo_color -t '35' 'Debug') ${*}"
+        fi
     fi
 }
 
@@ -180,7 +195,11 @@ _msg_error() {
         esac
     done
     shift $((OPTIND - 1))
-    echo ${echo_opts} "$( echo_color -t '36' "[${script_name}]")   $( echo_color -t '31' 'Error') ${1}" >&2
+    if [[ "${nocolor}" = true ]]; then
+        echo ${echo_opts} "[${script_name}]   Error ${1}"
+    else
+        echo ${echo_opts} "$( echo_color -t '36' "[${script_name}]")   $( echo_color -t '31' 'Error') ${1}" >&2
+    fi
     if [[ -n "${2:-}" ]]; then
         exit ${2}
     fi
@@ -319,7 +338,7 @@ fi
 
 options="${@}"
 _opt_short="h,a:,g:,r:,w:,f"
-_opt_long="help,arch:,giturl:,repodir:,workdir:,force,force-repo"
+_opt_long="help,arch:,giturl:,repodir:,workdir:,force,force-repo,nocolor"
 OPT=$(getopt -o ${_opt_short} -l ${_opt_long} -- "${@}")
 if [[ ${?} != 0 ]]; then
     exit 1
@@ -358,6 +377,10 @@ while :; do
             ;;
         --force-repo)
             force_repo=true
+            shift 1
+            ;;
+        --nocolor)
+            nocolor=true
             shift 1
             ;;
         --)
