@@ -2,7 +2,11 @@
 
 $json = file_get_contents("php://input");
 $contents = json_decode($json, true);
-exec("php exec.php '".$contents["callbackurl"]."' > /dev/null &", $opt, $return);
+exec("php exec.php ".  $contents["callbackurl"]." ".
+                        $contents["architecture"]." ".
+                        $contents["repository"]." ".
+                        $contents["package"]." ".
+                        $contents["what"]." > /dev/null &", $opt, $return);
 
 $opt_str="";
 foreach ($opt as $value) {
