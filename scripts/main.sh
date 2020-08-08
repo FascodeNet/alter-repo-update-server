@@ -27,6 +27,7 @@ nocolor=false
 force=false
 force_repo=false
 command=""
+skip_pkg=()
 
 set -e
 
@@ -36,20 +37,21 @@ _usage() {
     echo
     echo " General options:"
     echo
-    echo "    -a | --arch <arch>             Specify the architecture"
-    echo "    -r | --repodir <dir>           Specify the repository dir"
-    echo "    -g | --giturl <url>            Specify the URL of the repository where the PKGBUILD list is stored"
-    echo "    -f | --force                   Force builds of already built packages"
-    echo "         --force-repo              Overwrite the existing repository."
-    echo "    -w | --workdir <dir>           Specify the work dir"
-    echo "    -h | --help                    Show this help message"
+    echo "    -a | --arch <arch>               Specify the architecture"
+    echo "    -r | --repodir <dir>             Specify the repository dir"
+    echo "    -s | --skip '<pkg1> <pkg2>...'   Skip building the specified package"
+    echo "    -g | --giturl <url>              Specify the URL of the repository where the PKGBUILD list is stored"
+    echo "    -f | --force                     Force builds of already built packages"
+    echo "         --force-repo                Overwrite the existing repository."
+    echo "    -w | --workdir <dir>             Specify the work dir"
+    echo "    -h | --help                      Show this help message"
     echo
-    echo "         --nocolor                 No colored output."
+    echo "         --nocolor                   No colored output."
     echo
-    echo "    list                           List packages"
-    echo "    build                          Build all packages"
-    echo "    clean                          Remove working directory"
-    echo "    help                           Show this help message"
+    echo "    list                             List packages"
+    echo "    build                            Build all packages"
+    echo "    clean                            Remove working directory"
+    echo "    help                             Show this help message"
 
     if [[ -n "${1:-}" ]]; then
         exit "${1}"
@@ -304,6 +306,12 @@ build() {
     fi
 
     for pkg in ${build_list[@]}; do
+
+        # スキップするパッケージかどうかを確認
+        if [[ $(printf '%s\n' "${skip_pkg[@]}" | grep -qx "${pkg}"; echo -n ${?} ) -eq 0 ]]; then
+            continue
+        fi
+
         cd "${pkg}"
         if [[ ! -f "${work_dir}/lockfile/${repo_name}/${arch}/${pkg}" ]] || [[ "${force}" = true ]]; then
             makepkg --syncdeps --rmdeps --clean --cleanbuild --force --noconfirm --needed --skippgpcheck
@@ -340,8 +348,8 @@ if [[ -z "${@}" ]]; then
 fi
 
 options="${@}"
-_opt_short="h,a:,g:,r:,w:,f"
-_opt_long="help,arch:,giturl:,repodir:,workdir:,force,force-repo,nocolor"
+_opt_short="h,a:,g:,r:,w:,f,s:"
+_opt_long="help,arch:,giturl:,repodir:,workdir:,force,force-repo,nocolor,skip:"
 OPT=$(getopt -o ${_opt_short} -l ${_opt_long} -- "${@}")
 if [[ ${?} != 0 ]]; then
     exit 1
@@ -385,6 +393,10 @@ while :; do
         --nocolor)
             nocolor=true
             shift 1
+            ;;
+        -s | --skip)
+            skip_pkg=(${2})
+            shift 2
             ;;
         --)
             shift 1
