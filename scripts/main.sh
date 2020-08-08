@@ -280,9 +280,10 @@ build() {
     root_check
     if [[ "${force_repo}"  = true ]]; then
         remove "${repo_dir}/${repo_name}/${arch}"
-    elif [[ -d "${repo_dir}/${repo_name}/${arch}" ]]; then
-        _msg_error "The repository already exists." "1"
     fi
+    #if [[ -d "${repo_dir}/${repo_name}/${arch}" ]]; then
+    #    _msg_error "The repository already exists." "1"
+    #fi
 
 
     remove "${work_dir}/git_work"
