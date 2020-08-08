@@ -244,8 +244,6 @@ check_command() {
 
 
 prepare() {
-    mkdir -p "${repo_dir}/${repo_name}/${arch}"
-    mkdir -p "${work_dir}"
     check_command makepkg
     check_command git
     check_command pacman
@@ -285,11 +283,15 @@ build() {
     #    _msg_error "The repository already exists." "1"
     #fi
 
-
+    # Prepare to build
     remove "${work_dir}/git_work"
+    mkdir -p "${repo_dir}/${repo_name}/${arch}"
+    mkdir -p "${work_dir}"
     mkdir -p "${work_dir}/lockfile/${repo_name}/${arch}"
     mkdir -p "${work_dir}/pkgs/${repo_name}/${arch}"
     git clone "${git_url}" "${work_dir}/git_work"
+
+
     local init_dir=$(pwd)
     local build_list
 
