@@ -313,7 +313,7 @@ build() {
             _msg_info "${pkg} is already built."
         fi
         cd ..
-        rm -rf "${pkg}"
+        #rm -rf "${pkg}"
     done
 
     _msg_info "Copying package to repository directory..."
