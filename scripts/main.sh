@@ -88,10 +88,7 @@ _usage() {
 # 1 => Bold on (太字)
 # 4 => Underscore (下線)
 # 5 => Blink on (点滅)
-# 7 => Reverse video on (色反転)
-# 8 => Concealed on
-
-echo_color() {
+# 7 => Reverse video on (色反転)debug
     local backcolor
     local textcolor
     local decotypes
@@ -309,6 +306,7 @@ build() {
 
         # スキップするパッケージかどうかを確認
         if [[ $(printf '%s\n' "${skip_pkg[@]}" | grep -qx "${pkg}"; echo -n ${?} ) -eq 0 ]]; then
+            _msg_debug "Skipped building ${pkg} package"
             continue
         fi
 
