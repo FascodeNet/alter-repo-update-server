@@ -367,11 +367,11 @@ while :; do
             shift 2
             ;;
         --repodir | -r)
-            repo_dir="$(fullpath "${2}")"
+            repo_dir="$(realpath "${2}")"
             shift 2
             ;;
         --workdir | -w)
-            work_dir="$(fullpath "${2}")"
+            work_dir="$(realpath "${2}")"
             shift 2
             ;;
         --force | -f)
