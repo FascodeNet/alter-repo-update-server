@@ -88,7 +88,10 @@ _usage() {
 # 1 => Bold on (太字)
 # 4 => Underscore (下線)
 # 5 => Blink on (点滅)
-# 7 => Reverse video on (色反転)debug
+# 7 => Reverse video on (色反転)
+# 8 => Concealed on
+
+echo_color() {
     local backcolor
     local textcolor
     local decotypes
@@ -294,36 +297,38 @@ build() {
     local init_dir=$(pwd)
     local build_list
 
-    cd "${work_dir}/git_work/${repo_name}/${arch}"
-    local pkg
-    if [[ "${pkgs[@]}" = "ALL" ]]; then
-        build_list=($(ls 2> /dev/null))
-    else
-        build_list=(${pkgs[@]})
-    fi
-
-    for pkg in ${build_list[@]}; do
-
-        # スキップするパッケージかどうかを確認
-        if [[ $(printf '%s\n' "${skip_pkg[@]}" | grep -qx "${pkg}"; echo -n ${?} ) -eq 0 ]]; then
-            _msg_debug "Skipped building ${pkg} package"
-            continue
-        fi
-
-        cd "${pkg}"
-        if [[ ! -f "${work_dir}/lockfile/${repo_name}/${arch}/${pkg}" ]] || [[ "${force}" = true ]]; then
-            makepkg --syncdeps --rmdeps --clean --cleanbuild --force --noconfirm --needed --skippgpcheck
-            mv *.pkg.tar.* "${work_dir}/pkgs/${repo_name}/${arch}"
-            touch "${work_dir}/lockfile/${repo_name}/${arch}/${pkg}"
+    for _arch in "${arch}" "any"; do
+        cd "${work_dir}/git_work/${repo_name}/${_arch}"
+        local pkg
+        if [[ "${pkgs[@]}" = "ALL" ]]; then
+            build_list=($(ls 2> /dev/null))
         else
-            _msg_info "${pkg} is already built."
+            build_list=(${pkgs[@]})
         fi
-        cd ..
-        #rm -rf "${pkg}"
+
+        for pkg in ${build_list[@]}; do
+            # スキップするパッケージかどうかを確認
+            if [[ $(printf '%s\n' "${skip_pkg[@]}" | grep -qx "${pkg}"; echo -n ${?} ) -eq 0 ]]; then
+                _msg_debug "Skipped building ${pkg} package"
+                continue
+            fi
+
+            cd "${pkg}"
+            if [[ ! -f "${work_dir}/lockfile/${repo_name}/${_arch}/${pkg}" ]] || [[ "${force}" = true ]]; then
+                makepkg --syncdeps --rmdeps --clean --cleanbuild --force --noconfirm --needed --skippgpcheck
+                mv *.pkg.tar.* "${work_dir}/pkgs/${repo_name}/${_arch}"
+                touch "${work_dir}/lockfile/${repo_name}/${_arch}/${pkg}"
+            else
+                _msg_info "${pkg} is already built."
+            fi
+            cd ..
+            #rm -rf "${pkg}"
+        done
     done
 
     _msg_info "Copying package to repository directory..."
-    cp "${work_dir}/pkgs/${repo_name}/${arch}/"* "${repo_dir}/${repo_name}/${arch}"
+    cp "${work_dir}/pkgs/${repo_name}/${arch}/"* "${repo_dir}/${repo_name}/${_arch}"
+    cp "${work_dir}/pkgs/${repo_name}/any/"* "${repo_dir}/${repo_name}/any"
 
     sudo rm -rf "${work_dir}/git_work"
 
