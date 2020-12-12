@@ -301,6 +301,9 @@ build() {
     local build_list
 
     for _arch in "${arch}" "any"; do
+        if [[ ! -d "${work_dir}/git_work/${repo_name}/${_arch}" ]]; then
+            continue
+        fi
         cd "${work_dir}/git_work/${repo_name}/${_arch}"
         local pkg
         if [[ "${pkgs[@]}" = "ALL" ]]; then
