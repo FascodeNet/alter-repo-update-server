@@ -293,6 +293,7 @@ build() {
     mkdir -p "${work_dir}/lockfile/${repo_name}/${arch}"
     mkdir -p "${work_dir}/lockfile/${repo_name}/any"
     mkdir -p "${work_dir}/pkgs/${repo_name}/${arch}"
+    mkdir -p "${work_dir}/pkgs/${repo_name}/any"
     git clone "${git_url}" "${work_dir}/git_work"
 
 
@@ -318,7 +319,7 @@ build() {
             cd "${pkg}"
             if [[ ! -f "${work_dir}/lockfile/${repo_name}/${_arch}/${pkg}" ]] || [[ "${force}" = true ]]; then
                 makepkg --syncdeps --rmdeps --clean --cleanbuild --force --noconfirm --needed --skippgpcheck
-                mv *.pkg.tar.* "${work_dir}/pkgs/${repo_name}/${arch}"
+                mv *.pkg.tar.* "${work_dir}/pkgs/${repo_name}/${_arch}/"
                 touch "${work_dir}/lockfile/${repo_name}/${_arch}/${pkg}"
             else
                 _msg_info "${pkg} is already built."
