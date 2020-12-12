@@ -333,8 +333,14 @@ build() {
     done
 
     _msg_info "Copying package to repository directory..."
-    cp "${work_dir}/pkgs/${repo_name}/${arch}/"* "${repo_dir}/${repo_name}/${arch}/"
-    cp "${work_dir}/pkgs/${repo_name}/any/"* "${repo_dir}/${repo_name}/${arch}/"
+
+    if [[ -n $(ls "${work_dir}/pkgs/${repo_name}/${arch}/"* 2> /dev/null) ]]; then
+        cp "${work_dir}/pkgs/${repo_name}/${arch}/"* "${repo_dir}/${repo_name}/${arch}/"
+    fi
+
+    if [[ -n $(ls "${work_dir}/pkgs/${repo_name}/any/"* 2> /dev/null ) ]]; then
+        cp "${work_dir}/pkgs/${repo_name}/any/"* "${repo_dir}/${repo_name}/${arch}/"
+    fi
 
     sudo rm -rf "${work_dir}/git_work"
 
