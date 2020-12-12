@@ -288,12 +288,12 @@ build() {
 
     # Prepare to build
     remove "${work_dir}/git_work"
-    mkdir -p "${repo_dir}/${repo_name}/any"
     mkdir -p "${repo_dir}/${repo_name}/${arch}"
     mkdir -p "${work_dir}"
     mkdir -p "${work_dir}/lockfile/${repo_name}/${arch}"
     mkdir -p "${work_dir}/lockfile/${repo_name}/any"
     mkdir -p "${work_dir}/pkgs/${repo_name}/${arch}"
+    mkdir -p "${work_dir}/pkgs/${repo_name}/any"
     git clone "${git_url}" "${work_dir}/git_work"
 
 
