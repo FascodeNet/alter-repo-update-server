@@ -260,16 +260,17 @@ root_check() {
 }
 
 repo_update() {
-    cd "${repo_dir}/${repo_name}/${arch}"
-    rm -rf *.db.* *.files.* *.db *.files
-    repo-add "${repo_name}.db.tar.gz" $(ls ./*.pkg.tar.* | grep -v .sig | grep -v .sh)
+    local _pkg_dir="${repo_dir}/${repo_name}/${arch}"
+    cd "${_pkg_dir}"
+    rm -rf "${_pkg_dir}/"*".db."* "${_pkg_dir}/"*".files."* "${_pkg_dir}/"*".db" "${_pkg_dir}/"*".files"
+    repo-add "${repo_name}.db.tar.gz" $(ls "${_pkg_dir}/"*".pkg.tar."* | grep -v ".sig" | grep -v ".sh")
 }
 
 sign_pkg() {
-    local pkg
-    cd "${repo_dir}/${repo_name}/${arch}"
-    remove *.sig
-    for pkg in $(ls ./*.pkg.tar.* | grep -v .sig | grep -v .sh); do
+    local pkg _pkg_dir="${repo_dir}/${repo_name}/${arch}"
+    cd "${_pkg_dir}"
+    remove "${_pkg_dir}/"*".sig"
+    for pkg in $(ls "${_pkg_dir}/"*".pkg.tar."* | grep -v ".sig" | grep -v ".sh"); do
         _msg_info "Signing ${pkg}..."
         gpg --detach-sign ${pkg}
     done
@@ -293,7 +294,6 @@ build() {
     mkdir -p "${work_dir}/lockfile/${repo_name}/${arch}"
     mkdir -p "${work_dir}/lockfile/${repo_name}/any"
     mkdir -p "${work_dir}/pkgs/${repo_name}/${arch}"
-    mkdir -p "${work_dir}/pkgs/${repo_name}/any"
     git clone "${git_url}" "${work_dir}/git_work"
 
 
@@ -330,8 +330,8 @@ build() {
     done
 
     _msg_info "Copying package to repository directory..."
-    cp "${work_dir}/pkgs/${repo_name}/${arch}/"* "${repo_dir}/${repo_name}/${_arch}"
-    cp "${work_dir}/pkgs/${repo_name}/any/"* "${repo_dir}/${repo_name}/any"
+    cp "${work_dir}/pkgs/${repo_name}/${arch}/"* "${repo_dir}/${repo_name}/${arch}/"
+    cp "${work_dir}/pkgs/${repo_name}/any/"* "${repo_dir}/${repo_name}/${arch}/"
 
     sudo rm -rf "${work_dir}/git_work"
 
