@@ -27,6 +27,7 @@ nocolor=false
 force=false
 force_repo=false
 command=""
+gpgkey=""
 skip_pkg=()
 
 set -e
@@ -43,6 +44,7 @@ _usage() {
     echo "    -g | --giturl <url>              Specify the URL of the repository where the PKGBUILD list is stored"
     echo "    -f | --force                     Force builds of already built packages"
     echo "         --force-repo                Overwrite the existing repository."
+    echo "    -k | --gpgkey                    Specify the gpg key"
     echo "    -w | --workdir <dir>             Specify the work dir"
     echo "    -h | --help                      Show this help message"
     echo
@@ -272,7 +274,7 @@ sign_pkg() {
     remove "${_pkg_dir}/"*".sig"
     for pkg in $(ls "${_pkg_dir}/"*".pkg.tar."* | grep -v ".sig" | grep -v ".sh"); do
         _msg_info "Signing ${pkg}..."
-        gpg --detach-sign ${pkg}
+        gpg -u "${gpgkey}" --detach-sign ${pkg}
     done
 }
 
@@ -363,8 +365,8 @@ if [[ -z "${@}" ]]; then
 fi
 
 options="${@}"
-_opt_short="h,a:,g:,r:,w:,f,s:"
-_opt_long="help,arch:,giturl:,repodir:,workdir:,force,force-repo,nocolor,skip:"
+_opt_short="h,a:,g:,r:,w:,f,s:k:"
+_opt_long="help,arch:,giturl:,repodir:,workdir:,force,force-repo,nocolor,skip:,gpgkey:"
 OPT=$(getopt -o ${_opt_short} -l ${_opt_long} -- "${@}")
 if [[ ${?} != 0 ]]; then
     exit 1
@@ -400,6 +402,10 @@ while :; do
         --force | -f)
             force=true
             shift 1
+            ;;
+        -k | --gpgkey)
+            gpgkey="${2}"
+            shift 2
             ;;
         --force-repo)
             force_repo=true
