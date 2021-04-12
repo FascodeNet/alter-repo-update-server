@@ -20,6 +20,7 @@ repo_name="alter-stable"
 
 work_dir="${script_path}/work"
 repo_dir="${script_path}/repo"
+makepkg_conf="/etc/makepkg.conf"
 
 debug=false
 nocolor=false
@@ -49,6 +50,7 @@ _usage() {
     echo "    -h | --help                      Show this help message"
     echo
     echo "         --nocolor                   No colored output."
+    echo "         --makepkg-conf              Specift the config file for makepkg"
     echo
     echo "    list                             List packages"
     echo "    build                            Build all packages"
@@ -323,7 +325,7 @@ build() {
 
             cd "${pkg}"
             if [[ ! -f "${work_dir}/lockfile/${repo_name}/${_arch}/${pkg}" ]] || [[ "${force}" = true ]]; then
-                makepkg --ignorearch --syncdeps --rmdeps --clean --cleanbuild --force --noconfirm --needed --skippgpcheck
+                makepkg --ignorearch --syncdeps --rmdeps --clean --cleanbuild --force --noconfirm --needed --skippgpcheck --config "${makepkg_conf}"
                 mv *.pkg.tar.* "${work_dir}/pkgs/${repo_name}/${_arch}/"
                 touch "${work_dir}/lockfile/${repo_name}/${_arch}/${pkg}"
             else
@@ -366,7 +368,7 @@ fi
 
 options="${@}"
 _opt_short="h,a:,g:,r:,w:,f,s:k:"
-_opt_long="help,arch:,giturl:,repodir:,workdir:,force,force-repo,nocolor,skip:,gpgkey:"
+_opt_long="help,arch:,giturl:,repodir:,workdir:,force,force-repo,nocolor,skip:,gpgkey:,makepkg-conf:"
 OPT=$(getopt -o ${_opt_short} -l ${_opt_long} -- "${@}")
 if [[ ${?} != 0 ]]; then
     exit 1
@@ -417,6 +419,10 @@ while :; do
             ;;
         -s | --skip)
             skip_pkg=(${2})
+            shift 2
+            ;;
+        --makepkg-conf)
+            makepkg_conf="${2}"
             shift 2
             ;;
         --)
