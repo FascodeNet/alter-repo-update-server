@@ -28,8 +28,12 @@ nocolor=false
 force=false
 force_repo=false
 command=""
-gpgkey=""
 skip_pkg=()
+
+gpgkey="$(
+    source "/etc/makepkg.conf"
+    echo "${GPGKEY}"
+)"
 
 set -e
 
@@ -270,17 +274,6 @@ repo_update() {
     repo-add "${repo_name}.db.tar.gz" $(ls "${_pkg_dir}/"*".pkg.tar."* | grep -v ".sig" | grep -v ".sh")
 }
 
-sign_pkg() {
-    local pkg _pkg_dir="${repo_dir}/${repo_name}/${arch}"
-    cd "${_pkg_dir}"
-    remove "${_pkg_dir}/"*".sig"
-    for pkg in $(ls "${_pkg_dir}/"*".pkg.tar."* | grep -v ".sig" | grep -v ".sh"); do
-        _msg_info "Signing ${pkg}..."
-        gpg -u "${gpgkey}" --detach-sign ${pkg}
-    done
-}
-
-
 build() {
     root_check
     if [[ "${force_repo}"  = true ]]; then
@@ -324,8 +317,14 @@ build() {
             fi
 
             cd "${pkg}"
+
+            makepkg_args=(--ignorearch --syncdeps --rmdeps --clean --cleanbuild --force --noconfirm --needed --skippgpcheck --config "${makepkg_conf}")
+            if [[ ! "${gpgkey}" = "" ]]; then
+                makepkg_args+=(--key "${gpgkey}" --sign)
+            fi
+
             if [[ ! -f "${work_dir}/lockfile/${repo_name}/${_arch}/${pkg}" ]] || [[ "${force}" = true ]]; then
-                makepkg --ignorearch --syncdeps --rmdeps --clean --cleanbuild --force --noconfirm --needed --skippgpcheck --sign --config "${makepkg_conf}"
+                makepkg "${makepkg_args[@]}"
                 mv *.pkg.tar.* "${work_dir}/pkgs/${repo_name}/${_arch}/"
                 touch "${work_dir}/lockfile/${repo_name}/${_arch}/${pkg}"
             else
@@ -348,10 +347,6 @@ build() {
 
     sudo rm -rf "${work_dir}/git_work"
 
-
-    #if ${sign}; then
-    #    sign_pkg
-    #fi
     repo_update
 }
 
