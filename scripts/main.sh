@@ -325,7 +325,7 @@ build() {
 
             cd "${pkg}"
             if [[ ! -f "${work_dir}/lockfile/${repo_name}/${_arch}/${pkg}" ]] || [[ "${force}" = true ]]; then
-                makepkg --ignorearch --syncdeps --rmdeps --clean --cleanbuild --force --noconfirm --needed --skippgpcheck --config "${makepkg_conf}"
+                makepkg --ignorearch --syncdeps --rmdeps --clean --cleanbuild --force --noconfirm --needed --skippgpcheck --sign --config "${makepkg_conf}"
                 mv *.pkg.tar.* "${work_dir}/pkgs/${repo_name}/${_arch}/"
                 touch "${work_dir}/lockfile/${repo_name}/${_arch}/${pkg}"
             else
@@ -349,9 +349,9 @@ build() {
     sudo rm -rf "${work_dir}/git_work"
 
 
-    if ${sign}; then
-        sign_pkg
-    fi
+    #if ${sign}; then
+    #    sign_pkg
+    #fi
     repo_update
 }
 
